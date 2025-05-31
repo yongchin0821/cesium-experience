@@ -23,7 +23,8 @@ dist-ssr
 *.sln
 *.sw?
 
-src/assets
-src/ThirdParty
+public/Assets
+public/ThirdParty
+public/Widgets
 src/Widgets
-src/Workers
+public/Workers

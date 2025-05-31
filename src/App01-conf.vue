@@ -20,23 +20,8 @@ Cesium.Camera.DEFAULT_VIEW_RECTANGLE = Cesium.Rectangle.fromDegrees(
   61.2
 );
 
-onMounted(async () => {
-  const viewer = new Cesium.Viewer("cesiumContainer", {
-    // geocoder: false,
-    homeButton: false,
-    sceneModePicker: false,
-    baseLayerPicker: false,
-    navigationHelpButton: false,
-    animation: false,
-    timeline: false,
-    fullscreenButton: false,
-
-    //添加地形
-    terrainProvider: await Cesium.createWorldTerrainAsync({
-      requestVertexNormals: true,
-      requestWaterMask: true,
-    }),
-  });
+onMounted(() => {
+  const viewer = new Cesium.Viewer("cesiumContainer");
 
   //隐藏logo
   viewer.cesiumWidget.creditContainer.style.display = "none";

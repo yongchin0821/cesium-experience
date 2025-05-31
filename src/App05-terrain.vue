@@ -36,6 +36,7 @@ onMounted(async () => {
       requestVertexNormals: true,
       requestWaterMask: true,
     }),
+
   });
 
   //隐藏logo

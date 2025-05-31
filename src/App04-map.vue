@@ -20,7 +20,7 @@ Cesium.Camera.DEFAULT_VIEW_RECTANGLE = Cesium.Rectangle.fromDegrees(
   61.2
 );
 
-onMounted(async () => {
+onMounted(() => {
   const viewer = new Cesium.Viewer("cesiumContainer", {
     // geocoder: false,
     homeButton: false,
@@ -30,11 +30,25 @@ onMounted(async () => {
     animation: false,
     timeline: false,
     fullscreenButton: false,
-
-    //添加地形
-    terrainProvider: await Cesium.createWorldTerrainAsync({
-      requestVertexNormals: true,
-      requestWaterMask: true,
+    // imageryProvider: new Cesium.WebMapTileServiceImageryProvider({
+    //   url: "http://t0.tianditu.gov.cn/vec_w/wmts?tk=4341a89d7314a3381655b1f89c8b4f33",
+    //   layer: "tdtBasicLayer",
+    //   style: "default",
+    //   format: "image/jpeg",
+    //   tileMatrixSetID: "GoogleMapsCompatible",
+    // }),
+    //OSM地图
+    // imageryProvider: new Cesium.OpenStreetMapImageryProvider({
+    //   url: "https://a.title.openstreetmap.org",
+    // }),
+    //高德矢量地图
+    imageryProvider: new Cesium.UrlTemplateImageryProvider({
+      url: "https://webrd02.is.autonavi.com/appmaptile?lang=zh_cn&size=1&scale=1&style=8&x={x}&y={y}&z={z}",
+      // layer: "tdtVecBasicLayer",
+      // style: "default",
+      // format: "image/png",
+      // tileMatrixSetID: "GoogleMapsCompatible",
+        credit: 'High-resolution imagery provided by Gaode Maps'
     }),
   });
 
