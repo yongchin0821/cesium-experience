@@ -9,37 +9,95 @@ Cesium.Ion.defaultAccessToken =
 window.CESIUM_BASE_URL = "/";
 
 //设置默认视角
-Cesium.Camera.DEFAULT_VIEW_RECTANGLE = Cesium.Rectangle.fromDegrees(
-  //西边的经度
-  89.5,
-  //南边的纬度
-  20.4,
-  //东边的经度
-  110.4,
-  //北边的纬度
-  61.2
-);
+// Cesium.Camera.DEFAULT_VIEW_RECTANGLE = Cesium.Rectangle.fromDegrees(
+//   //西边的经度
+//   89.5,
+//   //南边的纬度
+//   20.4,
+//   //东边的经度
+//   110.4,
+//   //北边的纬度
+//   61.2
+// );
 
 onMounted(async () => {
   const viewer = new Cesium.Viewer("cesiumContainer", {
-    // geocoder: false,
     homeButton: false,
     sceneModePicker: false,
     baseLayerPicker: false,
     navigationHelpButton: false,
-    animation: false,
-    timeline: false,
+    animation: true,
+    timeline: true,
     fullscreenButton: false,
-
-    //添加地形
-    terrainProvider: await Cesium.createWorldTerrainAsync({
-      requestVertexNormals: true,
-      requestWaterMask: true,
-    }),
+    shouldAnimate: true,
+    terrainProvider: await Cesium.createWorldTerrainAsync(),
   });
 
   //隐藏logo
   viewer.cesiumWidget.creditContainer.style.display = "none";
+
+  const destination = Cesium.Cartesian3.fromDegrees(116.38, 39.9, 2000);
+
+  const tileset = await Cesium.createOsmBuildingsAsync();
+  viewer.scene.primitives.add(tileset);
+
+  viewer.camera.setView({
+    destination: destination,
+    orientation: {
+      heading: Cesium.Math.toRadians(0),
+      pitch: Cesium.Math.toRadians(-90),
+      roll: 0,
+    },
+  });
+
+  var handler = new Cesium.ScreenSpaceEventHandler(viewer.scene.canvas);
+  handler.setInputAction(function (movement) {
+    var pick = viewer.scene.pick(movement.position);
+    console.log(pick);
+  }, Cesium.ScreenSpaceEventType.LEFT_CLICK);
+
+  function performVisibilityAnalysis(observerPos, radius, fov, segments) {
+    const viewer = window.viewer;
+    const scene = viewer.scene;
+    const pointsVisible = [];
+    const pointsBlocked = [];
+
+    for (let angle = 0; angle < fov; angle += fov / segments) {
+      const heading = Cesium.Math.toRadians(angle);
+      const targetCartographic = Cesium.Cartographic.fromCartesian(observerPos);
+      const targetPos = Cesium.Cartesian3.fromRadians(
+        targetCartographic.longitude + 0.001 * Math.cos(heading),
+        targetCartographic.latitude + 0.001 * Math.sin(heading),
+        targetCartographic.height
+      );
+
+      const ray = new Cesium.Ray(
+        observerPos,
+        Cesium.Cartesian3.normalize(
+          Cesium.Cartesian3.subtract(
+            targetPos,
+            observerPos,
+            new Cesium.Cartesian3()
+          ),
+          new Cesium.Cartesian3()
+        )
+      );
+
+      const intersection = scene.globe.pick(ray, scene);
+
+      if (
+        !intersection ||
+        Cesium.Cartesian3.distance(observerPos, intersection) >=
+          Cesium.Cartesian3.distance(observerPos, targetPos)
+      ) {
+        pointsVisible.push(targetPos);
+      } else {
+        pointsBlocked.push(intersection);
+      }
+    }
+
+    drawResult(pointsVisible, pointsBlocked);
+  }
 });
 </script>
 
